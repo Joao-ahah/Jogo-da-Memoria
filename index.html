@@ -30,6 +30,20 @@
             background-color: #dbeafe;
             border-color: #3b82f6;
         }
+        @media (max-width: 1024px) {
+            #cards-area, #order-area {
+                grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+            }
+        }
+        @media (max-width: 640px) {
+            #cards-area, #order-area {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            }
+            .card-container, .drop-zone {
+                width: 70px !important;
+                height: 90px !important;
+            }
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-green-400 via-blue-500 to-purple-600 min-h-screen p-4">
@@ -191,9 +205,9 @@
             });
             cardsArea.addEventListener('drop', function(e) {
                 e.preventDefault();
+                const cardText = e.dataTransfer.getData('text/plain');
                 const sourceSlot = e.dataTransfer.getData('source-slot');
                 const isFromSlot = e.dataTransfer.getData('source-card') === 'true';
-                
                 if (isFromSlot && sourceSlot) {
                     // Limpar o slot de origem
                     const sourceElement = document.querySelector(`[data-slot="${sourceSlot}"]`);
@@ -201,6 +215,17 @@
                         sourceElement.innerHTML = `${parseInt(sourceSlot) + 1}`;
                         delete sourceElement.dataset.placed;
                     }
+                    // Recria o monte sem duplicatas
+                    let cartasAtuais = Array.from(document.querySelectorAll('#cards-area .card-container')).map(c => c.dataset.card);
+                    if (!cartasAtuais.includes(cardText)) {
+                        cartasAtuais.push(cardText);
+                    }
+                    // Remove todas as cartas e recria
+                    cardsArea.innerHTML = '';
+                    cartasAtuais.forEach((card, idx) => {
+                        cardsArea.innerHTML += createCard(card, idx);
+                    });
+                    addEventListeners(); // Reaplica listeners
                 }
             });
 
